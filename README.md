@@ -69,3 +69,54 @@ vrrp_instance LB2 {
 
 }
 ```
+
+
+## for master:
+
+```
+vrrp_script check_haproxy {
+   script "sh /usr/local/bin/haproxy-service-check.sh"
+   interval 2
+   fall 2
+   rise 2
+   weight 2
+}
+
+global_defs {
+   notification_email {
+      falahatshoniz@gmail.com
+   }
+}
+
+vrrp_instance LB1 {
+   state MASTER
+   interface ens160
+   virtual_router_id 50
+   priority 100
+   advert_int 1
+   accept
+
+   authentication {
+      auth_type PASS
+      auth_pass urpasswrd
+   }
+
+   virtual_ipaddress {
+      192.168.15.130 dev ens160
+   }
+
+   track_script {
+      check_haproxy
+   }
+   
+   track_interface {
+      ens160
+   }
+
+}
+```
+
+## for alternative LB:
+```
+
+```
