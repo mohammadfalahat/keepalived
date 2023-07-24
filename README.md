@@ -1,3 +1,63 @@
+# Active-Passive
+
+## for master:
+
+```
+global_defs {
+   enable_script_security
+   script_user root
+}
+
+vrrp_script check_haproxy {
+   script "killall -0 haproxy"
+   interval 2
+   weight 2
+   }
+
+vrrp_instance KUBE_API_LB {
+   state MASTER
+   interface ens160
+   virtual_router_id 51
+   priority 101
+   # The virtual ip address shared between the two loadbalancers
+   virtual_ipaddress {
+      ${vip_api}/32
+   }
+   track_script {
+      check_haproxy
+   }
+}
+```
+
+## for alternative LB:
+```
+global_defs {
+   enable_script_security
+   script_user root
+}
+# Script used to check if HAProxy is running
+vrrp_script check_haproxy {
+   script "killall -0 haproxy"
+   interval 2
+   weight 2
+}
+
+vrrp_instance KUBE_API_LB {
+   state BACKUP
+   interface ens160
+   virtual_router_id 51
+   priority 100
+   virtual_ipaddress {
+      ${vip_api}/32
+   }
+   track_script {
+      check_haproxy
+   }
+}
+```
+
+
+# Active-Active
 ```
 vrrp_script check_haproxy {
    script "sh /usr/local/bin/haproxy-service-check.sh"
@@ -71,52 +131,4 @@ vrrp_instance LB2 {
 ```
 
 
-## for master:
 
-```
-vrrp_script check_haproxy {
-   script "sh /usr/local/bin/haproxy-service-check.sh"
-   interval 2
-   fall 2
-   rise 2
-   weight 2
-}
-
-global_defs {
-   notification_email {
-      falahatshoniz@gmail.com
-   }
-}
-
-vrrp_instance LB1 {
-   state MASTER
-   interface ens160
-   virtual_router_id 50
-   priority 100
-   advert_int 1
-   accept
-
-   authentication {
-      auth_type PASS
-      auth_pass urpasswrd
-   }
-
-   virtual_ipaddress {
-      192.168.15.130 dev ens160
-   }
-
-   track_script {
-      check_haproxy
-   }
-   
-   track_interface {
-      ens160
-   }
-
-}
-```
-
-## for alternative LB:
-```
-
-```
