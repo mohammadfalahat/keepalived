@@ -1,3 +1,4 @@
+```
 vrrp_script check_haproxy {
    script "sh /usr/local/bin/haproxy-service-check.sh"
    interval 2
@@ -67,3 +68,4 @@ vrrp_instance LB2 {
    }
 
 }
+```
